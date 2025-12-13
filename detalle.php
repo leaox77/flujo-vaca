@@ -9,13 +9,14 @@ include "conexion.inc.php";
 
 $id = $_GET['id'] ?? 0;
 
-// Obtener datos de la solicitud
-$sql = "SELECT v.*, u.nombre as empleado_nombre, u.usuario as empleado_usuario,
-               s.nombre as supervisor_nombre, r.nombre as rrhh_nombre
-        FROM vacaciones v 
-        JOIN usuarios u ON v.empleado_id = u.id 
+// Obtener datos de la solicitud (RRHH solo si el usuario es rol rrhh)
+$sql = "SELECT v.*, u.nombre AS empleado_nombre, u.usuario AS empleado_usuario,
+               s.nombre AS supervisor_nombre,
+               r.nombre AS rrhh_nombre
+        FROM vacaciones v
+        JOIN usuarios u ON v.empleado_id = u.id
         LEFT JOIN usuarios s ON v.supervisor_id = s.id
-        LEFT JOIN usuarios r ON v.supervisor_id = r.id
+        LEFT JOIN usuarios r ON v.rrhh_id = r.id AND r.rol = 'rrhh'
         WHERE v.id = $id";
 $resultado = mysqli_query($con, $sql);
 $solicitud = mysqli_fetch_array($resultado);

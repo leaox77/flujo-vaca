@@ -33,17 +33,15 @@ if ($accion == 'siguiente') {
 switch ($pantalla) {
     case 'solicitud':
         if (!$nrotramite) {
-            // Nueva solicitud
-            $nrotramite = rand(1000, 9999);
-            
-            // Crear registro en vacaciones
-            $sql_vac = "INSERT INTO vacaciones (id, empleado_id, fecha_inicio, fecha_fin, 
+            // Nueva solicitud con id autoincremental
+            $sql_vac = "INSERT INTO vacaciones (empleado_id, fecha_inicio, fecha_fin, 
                         dias_solicitados, estado, dias_disponibles) 
-                       VALUES ($nrotramite, " . $_SESSION["idusuario"] . ", 
+                       VALUES (" . $_SESSION["idusuario"] . ", 
                        '" . $_POST["fecha_inicio"] . "', '" . $_POST["fecha_fin"] . "', 
                        " . $_POST["dias_solicitados"] . ", 'pendiente', 
                        " . $_POST["dias_disponibles"] . ")";
             mysqli_query($con, $sql_vac);
+            $nrotramite = mysqli_insert_id($con);
         }
         break;
         
@@ -65,6 +63,7 @@ switch ($pantalla) {
         
         $sql_vac = "UPDATE vacaciones SET 
                    estado = '$estado',
+                   rrhh_id = " . (int) $_SESSION["idusuario"] . ",
                    dias_descontar = " . $_POST["dias_descontar"] . ",
                    motivo_rechazo = '" . ($_POST["comentarios_rrhh"] ?? '') . "'
                    WHERE id = $nrotramite";

@@ -15,7 +15,7 @@ $solicitud = mysqli_fetch_array($resultado);
         <h4>¡Solicitud Aprobada!</h4>
         <p>Su solicitud de vacaciones ha sido aprobada.</p>
         <p><strong>Estado final:</strong> Aprobado por RRHH</p>
-        <p><strong>Días descontados:</strong> <?php echo $solicitud['dias_descontados'] ?? $solicitud['dias_solicitados']; ?></p>
+        <p><strong>Días descontados:</strong> <?php echo $solicitud['dias_descontar'] ?? $solicitud['dias_solicitados']; ?></p>
     </div>
 <?php elseif ($solicitud['estado'] == 'rechazado_supervisor'): ?>
     <div style="background: #f8d7da; padding: 15px; border-radius: 5px;">
