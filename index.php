@@ -45,7 +45,7 @@ include "conexion.inc.php";
     if ($_SESSION["rol"] == 'empleado') {
         $sql = "SELECT v.* FROM vacaciones v 
                 WHERE v.empleado_id = " . $_SESSION["idusuario"] . "
-                AND v.estado IN ('pendiente', 'aprobado_supervisor', 'aprobado_rrhh')
+                AND v.estado IN ('pendiente', 'aprobado_supervisor')
                 ORDER BY v.fecha_solicitud DESC";
     } elseif ($_SESSION["rol"] == 'supervisor') {
         $sql = "SELECT v.*, u.nombre as empleado_nombre 

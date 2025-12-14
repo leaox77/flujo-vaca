@@ -18,21 +18,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (strtotime($fecha_fin) < strtotime($fecha_inicio)) {
         $error = "La fecha de fin debe ser posterior a la fecha de inicio";
     } else {
-        // Generar número de trámite
-        $nrotramite = rand(1000, 9999);
-        
-        // Insertar en vacaciones
-        $sql = "INSERT INTO vacaciones (id, empleado_id, fecha_inicio, fecha_fin, 
+        // Insertar en vacaciones (id autoincremental)
+        $sql = "INSERT INTO vacaciones (empleado_id, fecha_inicio, fecha_fin, 
                 dias_solicitados, motivo, estado, dias_disponibles, fecha_solicitud) 
-               VALUES ($nrotramite, " . $_SESSION["idusuario"] . ", 
+               VALUES (" . $_SESSION["idusuario"] . ", 
                '$fecha_inicio', '$fecha_fin', $dias_solicitados, 
                '$motivo', 'pendiente', 30, NOW())";
-        $sql_seg = "INSERT INTO seguimiento (nrotramite, flujo, proceso, fechainicio, usuario) 
-           VALUES ($nrotramite, 'VAC', 'P4', NOW(), 'system')";
-mysqli_query($con, $sql_seg);
         
         if (mysqli_query($con, $sql)) {
-            // Registrar en seguimiento (inicia el flujo)
+            $nrotramite = mysqli_insert_id($con);
+            // Registrar en seguimiento
             $sql_seg = "INSERT INTO seguimiento (nrotramite, flujo, proceso, fechainicio, usuario) 
                        VALUES ($nrotramite, 'VAC', 'P4', NOW(), 'system')";
             mysqli_query($con, $sql_seg);

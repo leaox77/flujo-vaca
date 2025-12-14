@@ -7,11 +7,11 @@ if (!isset($_SESSION["usuario"]) || $_SESSION["rol"] != 'rrhh') {
 
 include "conexion.inc.php";
 
-$id = $_GET['id'] ?? 0;
+$id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
 // Obtener datos de la solicitud
-$sql = "SELECT v.*, u.nombre as empleado_nombre, u.usuario as empleado_usuario,
-               s.nombre as supervisor_nombre
+$sql = "SELECT v.*, u.nombre AS empleado_nombre, u.usuario AS empleado_usuario,
+               s.nombre AS supervisor_nombre
         FROM vacaciones v 
         JOIN usuarios u ON v.empleado_id = u.id 
         LEFT JOIN usuarios s ON v.supervisor_id = s.id
@@ -24,12 +24,12 @@ if (!$solicitud) {
 }
 
 // Procesar la decisión
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $decision = $_POST['decision'];
-    $dias_descontar = $_POST['dias_descontar'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $decision = $_POST['decision'] ?? '';
+    $dias_descontar = (int) ($_POST['dias_descontar'] ?? 0);
     $comentarios = $_POST['comentarios'] ?? '';
     
-    if ($decision == 'aprobar') {
+    if ($decision === 'aprobar') {
         $estado = 'aprobado_rrhh';
         $motivo_rechazo = '';
     } else {
@@ -37,29 +37,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $motivo_rechazo = $comentarios;
     }
     
-    // Actualizar la solicitud
+    // Actualizar la solicitud, asignando el RRHH que decide
+    $rrhhId = (int) $_SESSION["idusuario"];
     $sql_update = "UPDATE vacaciones SET 
                    estado = '$estado',
+                   rrhh_id = $rrhhId,
                    dias_descontar = $dias_descontar,
                    motivo_rechazo = '" . mysqli_real_escape_string($con, $motivo_rechazo) . "',
                    comentarios_rrhh = '" . mysqli_real_escape_string($con, $comentarios) . "',
                    fecha_aprobacion_rrhh = NOW()
                    WHERE id = $id";
     
+    // Cerrar seguimiento del paso P3
     $sql_fin = "UPDATE seguimiento SET fechafin = NOW() 
            WHERE nrotramite = $id AND flujo = 'VAC' 
            AND proceso = 'P3' AND fechafin IS NULL";
-mysqli_query($con, $sql_fin);
-
-// Luego, registrar P5 (notificación final)
-$sql_seg = "UPDATE seguimiento SET 
-            fechainicio = NOW(),
-            usuario = 'system',
-            fechafin = NULL
-            WHERE nrotramite = $id AND flujo = 'VAC' AND proceso = 'P5'";
+    mysqli_query($con, $sql_fin);
     
     if (mysqli_query($con, $sql_update)) {
-        // Registrar en seguimiento para notificar al empleado
+        // Registrar en seguimiento para notificación final al empleado
         $sql_seg = "INSERT INTO seguimiento (nrotramite, flujo, proceso, fechainicio, usuario) 
                    VALUES ($id, 'VAC', 'P5', NOW(), 'system')";
         mysqli_query($con, $sql_seg);
@@ -122,8 +118,8 @@ $sql_seg = "UPDATE seguimiento SET
             <label for="decision">Decisión Final:</label>
             <select id="decision" name="decision" required onchange="toggleComentarios()">
                 <option value="">-- Seleccione una opción --</option>
-                <option value="aprobar">✅ Aprobar definitivamente</option>
-                <option value="rechazar">❌ Rechazar solicitud</option>
+                <option value="aprobar">Aprobar definitivamente</option>
+                <option value="rechazar">Rechazar solicitud</option>
             </select>
             
             <label for="dias_descontar">Días a descontar:</label>
