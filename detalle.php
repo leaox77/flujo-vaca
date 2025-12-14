@@ -38,7 +38,12 @@ if ($_SESSION["rol"] == 'empleado' && $solicitud['empleado_id'] == $_SESSION["id
 if (!$puede_ver) {
     die("No tiene permisos para ver esta solicitud");
 }
+echo '<div style="margin-top: 20px;">';
+echo '<a href="index.php" class="btn">Volver al Inicio</a> ';
+echo '<a href="ver_workflow.php?id=' . $id . '" class="btn" style="background: #28a745;">Ver en Workflow</a>';
+echo '</div>';
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -137,5 +142,6 @@ if (!$puede_ver) {
             <a href="index.php" class="btn">Volver al Inicio</a>
         </div>
     </div>
+    
 </body>
 </html>
