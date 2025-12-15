@@ -9,7 +9,6 @@ include "conexion.inc.php";
 
 $id = $_GET['id'] ?? 0;
 
-// Obtener datos de la solicitud
 $sql = "SELECT * FROM vacaciones WHERE id = $id AND empleado_id = " . $_SESSION["idusuario"];
 $resultado = mysqli_query($con, $sql);
 $solicitud = mysqli_fetch_array($resultado);
@@ -64,7 +63,6 @@ if (!$solicitud) {
     </div>
     
     <script>
-    // Opcional: Imprimir comprobante
     function imprimirComprobante() {
         window.print();
     }

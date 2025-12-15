@@ -9,7 +9,6 @@ include "conexion.inc.php";
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-// Obtener información del trámite
 $sql_tramite = "SELECT v.*, u.nombre as empleado_nombre 
                FROM vacaciones v 
                JOIN usuarios u ON v.empleado_id = u.id 
@@ -21,7 +20,6 @@ if (!$tramite) {
     die("Trámite no encontrado");
 }
 
-// Obtener todos los pasos del flujo
 $sql = "SELECT s.*, f.pantalla, f.rol, f.cod_procesosiguiente 
         FROM seguimiento s 
         LEFT JOIN flujo f ON s.flujo = f.codflujo AND s.proceso = f.codproceso

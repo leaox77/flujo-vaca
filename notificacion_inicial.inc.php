@@ -30,7 +30,6 @@ $nrotramite = isset($_GET['nrotramite']) ? (int)$_GET['nrotramite'] : 0;
 </div>
 
 <script>
-// Mostrar progreso
 let progreso = 0;
 const barra = document.createElement('div');
 barra.style.cssText = 'width: 100%; height: 10px; background: #e0e0e0; border-radius: 5px; margin: 20px auto; max-width: 400px;';
@@ -39,21 +38,18 @@ relleno.style.cssText = 'width: 0%; height: 100%; background: linear-gradient(90
 barra.appendChild(relleno);
 document.querySelector('.form-container').appendChild(barra);
 
-// Animar la barra de progreso
 const intervalo = setInterval(() => {
     progreso += 10;
     relleno.style.width = progreso + '%';
     
     if (progreso >= 100) {
         clearInterval(intervalo);
-        // Redirigir automáticamente después de completar
         setTimeout(() => {
             window.location.href = "motor.php?cod_flujo=VAC&cod_proceso=P2&nrotramite=<?php echo $nrotramite; ?>";
         }, 500);
     }
 }, 200);
 
-// También redirigir después de 5 segundos por si acaso
 setTimeout(() => {
     window.location.href = "motor.php?cod_flujo=VAC&cod_proceso=P2&nrotramite=<?php echo $nrotramite; ?>";
 }, 5000);

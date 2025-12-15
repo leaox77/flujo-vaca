@@ -7,12 +7,10 @@ if (!isset($_SESSION["usuario"])) {
 
 include "conexion.inc.php";
 
-// Obtener parámetros
 $cod_flujo = $_GET["cod_flujo"] ?? 'VAC';
 $cod_proceso = $_GET["cod_proceso"] ?? 'P1';
 $nrotramite = isset($_GET["nrotramite"]) ? (int)$_GET["nrotramite"] : 0;
 
-// Obtener información del proceso actual
 $sql_flujo = "SELECT * FROM flujo WHERE codflujo='$cod_flujo' AND codproceso='$cod_proceso'";
 $result_flujo = mysqli_query($con, $sql_flujo);
 $fila_flujo = mysqli_fetch_array($result_flujo);
@@ -25,9 +23,7 @@ $pantalla = $fila_flujo["pantalla"];
 $rol_proceso = $fila_flujo["rol"];
 $proceso_siguiente = $fila_flujo["cod_procesosiguiente"];
 
-// ========== MANEJO DE NUEVOS TRÁMITES ==========
 if ($nrotramite == 0 && $cod_proceso == 'P1') {
-    // Crear nueva solicitud en vacaciones con valores temporales
     $sql_vac = "INSERT INTO vacaciones (empleado_id, estado, fecha_solicitud, dias_disponibles, 
                 fecha_inicio, fecha_fin, dias_solicitados) 
                 VALUES (" . $_SESSION["idusuario"] . ", 'pendiente', NOW(), 30, 
@@ -37,23 +33,18 @@ if ($nrotramite == 0 && $cod_proceso == 'P1') {
     }
     $nrotramite = mysqli_insert_id($con);
     
-    // Registrar primer paso en seguimiento (P1)
     $sql_seg = "INSERT INTO seguimiento (nrotramite, flujo, proceso, fechainicio, usuario, estado) 
                 VALUES ($nrotramite, '$cod_flujo', '$cod_proceso', NOW(), '" . $_SESSION["usuario"] . "', 'pendiente')";
     mysqli_query($con, $sql_seg);
     
-    // También registrar proceso P4 (sistema) para que aparezca en seguimiento
     $sql_seg_p4 = "INSERT INTO seguimiento (nrotramite, flujo, proceso, fechainicio, usuario, estado) 
                   VALUES ($nrotramite, '$cod_flujo', 'P4', NOW(), 'system', 'pendiente')";
     mysqli_query($con, $sql_seg_p4);
 }
 
-// ========== VERIFICACIÓN DE PERMISOS ==========
 if ($nrotramite > 0) {
     if ($rol_proceso == 'system') {
-        // Procesos del sistema no requieren verificación
     } elseif ($rol_proceso == $_SESSION["rol"]) {
-        // Verificar si ya existe un registro en seguimiento para este proceso
         $sql_check = "SELECT * FROM seguimiento 
                      WHERE nrotramite = $nrotramite 
                      AND flujo = '$cod_flujo' 
@@ -62,7 +53,6 @@ if ($nrotramite > 0) {
         $result_check = mysqli_query($con, $sql_check);
         
         if (mysqli_num_rows($result_check) == 0) {
-            // Verificar si hay algún registro anterior en seguimiento
             $sql_prev = "SELECT * FROM seguimiento 
                         WHERE nrotramite = $nrotramite 
                         AND flujo = '$cod_flujo'
@@ -70,21 +60,16 @@ if ($nrotramite > 0) {
             $result_prev = mysqli_query($con, $sql_prev);
             
             if (mysqli_num_rows($result_prev) > 0) {
-                // Hay registros anteriores, crear nuevo para este usuario
                 $sql_seg_new = "INSERT INTO seguimiento (nrotramite, flujo, proceso, fechainicio, usuario, estado) 
                                VALUES ($nrotramite, '$cod_flujo', '$cod_proceso', NOW(), '" . $_SESSION["usuario"] . "', 'pendiente')";
                 mysqli_query($con, $sql_seg_new);
             } else {
-                // No hay registros, pero el usuario tiene el rol correcto
-                // Crear registro para que pueda acceder
                 $sql_seg_new = "INSERT INTO seguimiento (nrotramite, flujo, proceso, fechainicio, usuario, estado) 
                                VALUES ($nrotramite, '$cod_flujo', '$cod_proceso', NOW(), '" . $_SESSION["usuario"] . "', 'pendiente')";
                 mysqli_query($con, $sql_seg_new);
             }
         }
     } else {
-        // Verificar si el usuario puede acceder aunque no tenga registro directo
-        // Esto pasa cuando un supervisor/RRHH entra por primera vez a un trámite
         $sql_vac_check = "SELECT v.* FROM vacaciones v WHERE v.id = $nrotramite";
         $result_vac_check = mysqli_query($con, $sql_vac_check);
         $vac_check = mysqli_fetch_array($result_vac_check);
@@ -99,7 +84,6 @@ if ($nrotramite > 0) {
             }
             
             if ($puede_acceder) {
-                // Crear registro en seguimiento para este usuario
                 $sql_seg_new = "INSERT INTO seguimiento (nrotramite, flujo, proceso, fechainicio, usuario, estado) 
                                VALUES ($nrotramite, '$cod_flujo', '$cod_proceso', NOW(), '" . $_SESSION["usuario"] . "', 'pendiente')";
                 mysqli_query($con, $sql_seg_new);
@@ -113,7 +97,6 @@ if ($nrotramite > 0) {
     }
 }
 
-// ========== OBTENER DATOS DE LA SOLICITUD ==========
 $solicitud = null;
 if ($nrotramite > 0) {
     $sql_solicitud = "SELECT v.*, u.nombre as empleado_nombre 
@@ -124,7 +107,6 @@ if ($nrotramite > 0) {
     $solicitud = mysqli_fetch_array($result_solicitud);
 }
 
-// ========== OBTENER PROCESO ANTERIOR ==========
 $proceso_anterior = null;
 if ($nrotramite > 0) {
     $sql_ant = "SELECT * FROM flujo 

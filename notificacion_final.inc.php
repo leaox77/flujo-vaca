@@ -11,7 +11,6 @@ $solicitud = mysqli_fetch_array($resultado);
 
 $estado = $solicitud['estado'] ?? 'pendiente';
 
-// Determinar estilo y mensaje según estado
 if ($estado == 'aprobado_rrhh') {
     $estilo = 'background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left: 6px solid #28a745;';
     $icono = '✅';

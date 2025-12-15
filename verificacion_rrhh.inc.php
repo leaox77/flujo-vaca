@@ -96,7 +96,6 @@ function toggleComentarios() {
     }
 }
 
-// Validar que los días a descontar no superen los disponibles
 document.getElementById('dias_descontar').addEventListener('change', function() {
     const max = <?php echo $solicitud['dias_disponibles']; ?>;
     const valor = parseInt(this.value);

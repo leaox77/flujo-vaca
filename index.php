@@ -7,11 +7,9 @@ if (!isset($_SESSION["usuario"])) {
 
 include "conexion.inc.php";
 
-// Obtener procesos pendientes según rol
 $result_pendientes = null;
 
 if ($_SESSION["rol"] == 'empleado') {
-    // Empleado ve sus solicitudes pendientes donde él es el usuario en seguimiento
     $sql_pendientes = "SELECT DISTINCT s.*, v.*, f.pantalla
                       FROM seguimiento s
                       JOIN vacaciones v ON s.nrotramite = v.id
@@ -22,9 +20,6 @@ if ($_SESSION["rol"] == 'empleado') {
                       ORDER BY s.fechainicio DESC";
     
 } elseif ($_SESSION["rol"] == 'supervisor') {
-    // Supervisor ve solicitudes donde:
-    // 1. El estado es 'pendiente' (no revisado aún)
-    // 2. O donde el proceso actual es P2 o P2a y no está finalizado
     $sql_pendientes = "SELECT DISTINCT s.*, v.*, f.pantalla, f.rol, u.nombre as empleado_nombre
                       FROM seguimiento s
                       JOIN vacaciones v ON s.nrotramite = v.id
@@ -37,9 +32,6 @@ if ($_SESSION["rol"] == 'empleado') {
                       ORDER BY s.fechainicio DESC";
     
 } elseif ($_SESSION["rol"] == 'rrhh') {
-    // RRHH ve solicitudes donde:
-    // 1. El estado es 'aprobado_supervisor' (pendiente de RRHH)
-    // 2. O donde el proceso actual es P3 y no está finalizado
     $sql_pendientes = "SELECT DISTINCT s.*, v.*, f.pantalla, f.rol, u.nombre as empleado_nombre
                       FROM seguimiento s
                       JOIN vacaciones v ON s.nrotramite = v.id
@@ -54,9 +46,7 @@ if ($_SESSION["rol"] == 'empleado') {
 
 $result_pendientes = mysqli_query($con, $sql_pendientes);
 
-// Si no hay resultados para supervisor/RRHH, buscar de otra forma
 if ($_SESSION["rol"] != 'empleado' && mysqli_num_rows($result_pendientes) == 0) {
-    // Buscar trámites que deberían estar en ese rol según el flujo
     if ($_SESSION["rol"] == 'supervisor') {
         $sql_alternativa = "SELECT v.*, 'P2' as proceso, 'VAC' as flujo, 'listado' as pantalla,
                            u.nombre as empleado_nombre, NOW() as fechainicio
@@ -331,7 +321,6 @@ if ($_SESSION["rol"] != 'empleado' && mysqli_num_rows($result_pendientes) == 0) 
                              ORDER BY v.fecha_solicitud DESC 
                              LIMIT 10";
         } else {
-            // Para supervisores y RRHH, mostrar todas las solicitudes
             $sql_historial = "SELECT v.*, 
                              (SELECT proceso FROM seguimiento 
                               WHERE nrotramite = v.id 

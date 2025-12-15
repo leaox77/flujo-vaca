@@ -10,8 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $resultado = mysqli_query($con, $sql);
     
     if ($fila = mysqli_fetch_array($resultado)) {
-        // En producción usar password_verify()
-        if ($password == '123456') { // Contraseña fija para pruebas
+        if ($password == '123456') {
             $_SESSION["usuario"] = $fila['usuario'];
             $_SESSION["idusuario"] = $fila['id'];
             $_SESSION["rol"] = $fila['rol'];

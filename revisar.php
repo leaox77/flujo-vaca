@@ -9,7 +9,6 @@ include "conexion.inc.php";
 
 $id = $_GET['id'] ?? 0;
 
-// Obtener datos de la solicitud
 $sql = "SELECT v.*, u.nombre as empleado_nombre, u.usuario as empleado_usuario
         FROM vacaciones v 
         JOIN usuarios u ON v.empleado_id = u.id 
@@ -21,7 +20,6 @@ if (!$solicitud) {
     die("Solicitud no encontrada o ya procesada");
 }
 
-// Procesar la decisión
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $decision = $_POST['decision'];
     $comentarios = $_POST['comentarios'] ?? '';
@@ -34,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $motivo_rechazo = $comentarios;
     }
     
-    // Actualizar la solicitud
     $sql_update = "UPDATE vacaciones SET 
                    estado = '$estado',
                    supervisor_id = " . $_SESSION["idusuario"] . ",
@@ -44,18 +41,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                    WHERE id = $id";
     
     if (mysqli_query($con, $sql_update)) {
-        // Primero, marcar como finalizado el proceso actual (P4)
         $sql_fin = "UPDATE seguimiento SET fechafin = NOW() 
                    WHERE nrotramite = $id AND flujo = 'VAC' 
                    AND proceso = 'P4' AND fechafin IS NULL";
         mysqli_query($con, $sql_fin);
         
-        // Luego, registrar el nuevo proceso
         if ($decision == 'aprobar') {
-            // Para aprobación, ir a P3 (RRHH)
             $proceso_siguiente = 'P3';
         } else {
-            // Para rechazo, ir a P5 (notificación empleado)
             $proceso_siguiente = 'P5';
         }
         

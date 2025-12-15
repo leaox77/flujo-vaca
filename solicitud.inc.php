@@ -53,7 +53,6 @@ function calcularDias() {
         const fechaInicio = new Date(inicio.value);
         const fechaFin = new Date(fin.value);
         
-        // Validar que la fecha fin sea posterior
         if (fechaFin < fechaInicio) {
             alert('❌ La fecha de fin debe ser posterior a la fecha de inicio');
             fin.value = '';
@@ -61,11 +60,9 @@ function calcularDias() {
             return;
         }
         
-        // Calcular diferencia en días
         const diffTime = fechaFin.getTime() - fechaInicio.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
         
-        // Validar máximo 30 días
         if (diffDays > 30) {
             alert('⚠️ No puede solicitar más de 30 días de vacaciones consecutivos');
             fin.value = '';
@@ -77,11 +74,9 @@ function calcularDias() {
     }
 }
 
-// Inicializar cálculo
 document.addEventListener('DOMContentLoaded', function() {
     calcularDias();
     
-    // Configurar mínimo para fecha fin
     const inicio = document.getElementById('fecha_inicio');
     const fin = document.getElementById('fecha_fin');
     

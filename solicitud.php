@@ -7,18 +7,15 @@ if (!isset($_SESSION["usuario"]) || $_SESSION["rol"] != 'empleado') {
 
 include "conexion.inc.php";
 
-// Procesar formulario si se envió
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $fecha_inicio = $_POST['fecha_inicio'];
     $fecha_fin = $_POST['fecha_fin'];
     $dias_solicitados = $_POST['dias_solicitados'];
     $motivo = $_POST['motivo'] ?? '';
     
-    // Validar fechas
     if (strtotime($fecha_fin) < strtotime($fecha_inicio)) {
         $error = "La fecha de fin debe ser posterior a la fecha de inicio";
     } else {
-        // Insertar en vacaciones (id autoincremental)
         $sql = "INSERT INTO vacaciones (empleado_id, fecha_inicio, fecha_fin, 
                 dias_solicitados, motivo, estado, dias_disponibles, fecha_solicitud) 
                VALUES (" . $_SESSION["idusuario"] . ", 
@@ -27,12 +24,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         if (mysqli_query($con, $sql)) {
             $nrotramite = mysqli_insert_id($con);
-            // Registrar en seguimiento
             $sql_seg = "INSERT INTO seguimiento (nrotramite, flujo, proceso, fechainicio, usuario) 
                        VALUES ($nrotramite, 'VAC', 'P4', NOW(), 'system')";
             mysqli_query($con, $sql_seg);
             
-            // Redirigir a página de éxito
             header("Location: solicitud_exitosa.php?id=" . $nrotramite);
             exit();
         } else {
@@ -106,7 +101,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
     
     <script>
-    // Calcular días automáticamente
     document.addEventListener('DOMContentLoaded', function() {
         const fechaInicio = document.getElementById('fecha_inicio');
         const fechaFin = document.getElementById('fecha_fin');

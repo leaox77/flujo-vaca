@@ -9,7 +9,6 @@ include "conexion.inc.php";
 
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
-// Obtener datos de la solicitud
 $sql = "SELECT v.*, u.nombre AS empleado_nombre, u.usuario AS empleado_usuario,
                s.nombre AS supervisor_nombre
         FROM vacaciones v 
@@ -23,7 +22,6 @@ if (!$solicitud) {
     die("Solicitud no encontrada o no está lista para verificación RRHH");
 }
 
-// Procesar la decisión
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $decision = $_POST['decision'] ?? '';
     $dias_descontar = (int) ($_POST['dias_descontar'] ?? 0);
@@ -37,7 +35,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $motivo_rechazo = $comentarios;
     }
     
-    // Actualizar la solicitud, asignando el RRHH que decide
     $rrhhId = (int) $_SESSION["idusuario"];
     $sql_update = "UPDATE vacaciones SET 
                    estado = '$estado',
@@ -48,14 +45,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                    fecha_aprobacion_rrhh = NOW()
                    WHERE id = $id";
     
-    // Cerrar seguimiento del paso P3
     $sql_fin = "UPDATE seguimiento SET fechafin = NOW() 
            WHERE nrotramite = $id AND flujo = 'VAC' 
            AND proceso = 'P3' AND fechafin IS NULL";
     mysqli_query($con, $sql_fin);
     
     if (mysqli_query($con, $sql_update)) {
-        // Registrar en seguimiento para notificación final al empleado
         $sql_seg = "INSERT INTO seguimiento (nrotramite, flujo, proceso, fechainicio, usuario) 
                    VALUES ($id, 'VAC', 'P5', NOW(), 'system')";
         mysqli_query($con, $sql_seg);

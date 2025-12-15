@@ -9,7 +9,6 @@ include "conexion.inc.php";
 
 $id = $_GET['id'] ?? 0;
 
-// Obtener datos de la solicitud (RRHH solo si el usuario es rol rrhh)
 $sql = "SELECT v.*, u.nombre AS empleado_nombre, u.usuario AS empleado_usuario,
                s.nombre AS supervisor_nombre,
                r.nombre AS rrhh_nombre
@@ -25,7 +24,6 @@ if (!$solicitud) {
     die("Solicitud no encontrada");
 }
 
-// Verificar permisos (solo el empleado dueño, su supervisor o RRHH pueden ver)
 $puede_ver = false;
 if ($_SESSION["rol"] == 'empleado' && $solicitud['empleado_id'] == $_SESSION["idusuario"]) {
     $puede_ver = true;
