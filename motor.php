@@ -27,9 +27,11 @@ $proceso_siguiente = $fila_flujo["cod_procesosiguiente"];
 
 // ========== MANEJO DE NUEVOS TRÁMITES ==========
 if ($nrotramite == 0 && $cod_proceso == 'P1') {
-    // Crear nueva solicitud en vacaciones
-    $sql_vac = "INSERT INTO vacaciones (empleado_id, estado, fecha_solicitud, dias_disponibles) 
-                VALUES (" . $_SESSION["idusuario"] . ", 'pendiente', NOW(), 30)";
+    // Crear nueva solicitud en vacaciones con valores temporales
+    $sql_vac = "INSERT INTO vacaciones (empleado_id, estado, fecha_solicitud, dias_disponibles, 
+                fecha_inicio, fecha_fin, dias_solicitados) 
+                VALUES (" . $_SESSION["idusuario"] . ", 'pendiente', NOW(), 30, 
+                CURDATE(), CURDATE(), 0)";
     if (!mysqli_query($con, $sql_vac)) {
         die("Error al crear solicitud: " . mysqli_error($con));
     }
